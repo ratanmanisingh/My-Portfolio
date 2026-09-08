@@ -22,9 +22,14 @@ document.querySelectorAll('.reveal').forEach((element) => observer.observe(eleme
 
 const canvas = document.querySelector('#starfield');
 const context = canvas.getContext('2d');
+const cursorRing = document.querySelector('.cursor-ring');
 let stars = [];
 let pointerX = 0;
 let pointerY = 0;
+let ringX = 0;
+let ringY = 0;
+let targetRingX = 0;
+let targetRingY = 0;
 function resizeCanvas() {
   canvas.width = window.innerWidth * devicePixelRatio;
   canvas.height = window.innerHeight * devicePixelRatio;
@@ -40,7 +45,27 @@ function drawStars(time = 0) {
 }
 resizeCanvas(); drawStars();
 window.addEventListener('resize', resizeCanvas);
-window.addEventListener('pointermove', (event) => { pointerX = event.clientX / window.innerWidth - .5; pointerY = event.clientY / window.innerHeight - .5; document.querySelector('.cursor-glow').style.left = `${event.clientX}px`; document.querySelector('.cursor-glow').style.top = `${event.clientY}px`; });
+window.addEventListener('pointermove', (event) => { pointerX = event.clientX / window.innerWidth - .5; pointerY = event.clientY / window.innerHeight - .5; targetRingX = event.clientX; targetRingY = event.clientY; document.querySelector('.cursor-glow').style.left = `${event.clientX}px`; document.querySelector('.cursor-glow').style.top = `${event.clientY}px`; });
+
+function animateCursor() {
+  ringX += (targetRingX - ringX) * .16;
+  ringY += (targetRingY - ringY) * .16;
+  if (cursorRing) cursorRing.style.transform = `translate3d(${ringX}px, ${ringY}px, 0)`;
+  requestAnimationFrame(animateCursor);
+}
+animateCursor();
+
+document.querySelectorAll('.project-card, .codolio-panel, .signal-card').forEach((card) => {
+  card.addEventListener('pointermove', (event) => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || window.innerWidth <= 800) return;
+    const bounds = card.getBoundingClientRect();
+    const rotateX = ((event.clientY - bounds.top) / bounds.height - .5) * -3;
+    const rotateY = ((event.clientX - bounds.left) / bounds.width - .5) * 3;
+    card.style.setProperty('--tilt-x', `${rotateX}deg`);
+    card.style.setProperty('--tilt-y', `${rotateY}deg`);
+  });
+  card.addEventListener('pointerleave', () => { card.style.setProperty('--tilt-x', '0deg'); card.style.setProperty('--tilt-y', '0deg'); });
+});
 
 const menuButton = document.querySelector('.menu-toggle');
 const nav = document.querySelector('.nav-links');
