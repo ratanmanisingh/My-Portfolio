@@ -72,4 +72,38 @@ const nav = document.querySelector('.nav-links');
 menuButton.addEventListener('click', () => { const isOpen = nav.classList.toggle('open'); menuButton.setAttribute('aria-expanded', isOpen); });
 nav.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => { nav.classList.remove('open'); menuButton.setAttribute('aria-expanded', 'false'); }));
 
+const progressBar = document.querySelector('.scroll-progress span');
+const dockLinks = [...document.querySelectorAll('.dock-dot')];
+const trackedSections = [...document.querySelectorAll('main section[id]')];
+const rotatingCopy = document.querySelector('[data-rotating-copy]');
+const copyOptions = ['worth exploring.', 'feel alive.', 'solve real problems.'];
+let copyIndex = 0;
+
+function updateScrollProgress() {
+  const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+  progressBar.style.width = `${scrollableHeight > 0 ? (window.scrollY / scrollableHeight) * 100 : 0}%`;
+}
+
+window.addEventListener('scroll', updateScrollProgress, { passive: true });
+updateScrollProgress();
+
+if (rotatingCopy && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  window.setInterval(() => {
+    rotatingCopy.classList.add('rotating-out');
+    window.setTimeout(() => {
+      copyIndex = (copyIndex + 1) % copyOptions.length;
+      rotatingCopy.textContent = copyOptions[copyIndex];
+      rotatingCopy.classList.remove('rotating-out');
+    }, 280);
+  }, 3200);
+}
+
+const dockObserver = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (!entry.isIntersecting) return;
+    dockLinks.forEach((link) => link.classList.toggle('is-active', link.hash === `#${entry.target.id}`));
+  });
+}, { rootMargin: '-42% 0px -48% 0px', threshold: 0 });
+trackedSections.forEach((section) => dockObserver.observe(section));
+
 document.querySelector('#contact-form').addEventListener('submit', (event) => { event.preventDefault(); const status = document.querySelector('.form-status'); status.textContent = 'Signal prepared. Opening your mail client...'; const formData = new FormData(event.currentTarget); const subject = encodeURIComponent(`Hello Ratanmani — ${formData.get('name')}`); const body = encodeURIComponent(`${formData.get('message')}\n\nReply to: ${formData.get('email')}`); window.location.href = `mailto:ratanmanisingh553@gmail.com?subject=${subject}&body=${body}`; });
