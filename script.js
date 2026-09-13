@@ -73,8 +73,18 @@ document.querySelectorAll('.project-card, .codolio-panel, .signal-card').forEach
 
 const menuButton = document.querySelector('.menu-toggle');
 const nav = document.querySelector('.nav-links');
-menuButton.addEventListener('click', () => { const isOpen = nav.classList.toggle('open'); menuButton.setAttribute('aria-expanded', isOpen); });
-nav.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => { nav.classList.remove('open'); menuButton.setAttribute('aria-expanded', 'false'); }));
+function closeNavigation() {
+  nav.classList.remove('open');
+  menuButton.setAttribute('aria-expanded', 'false');
+}
+menuButton.addEventListener('click', () => {
+  const isOpen = nav.classList.toggle('open');
+  menuButton.setAttribute('aria-expanded', String(isOpen));
+});
+nav.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeNavigation));
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') closeNavigation();
+});
 
 const progressBar = document.querySelector('.scroll-progress span');
 const dockLinks = [...document.querySelectorAll('.dock-dot')];
@@ -105,7 +115,12 @@ if (rotatingCopy && !window.matchMedia('(prefers-reduced-motion: reduce)').match
 const dockObserver = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
     if (!entry.isIntersecting) return;
-    dockLinks.forEach((link) => link.classList.toggle('is-active', link.hash === `#${entry.target.id}`));
+    dockLinks.forEach((link) => {
+      const isActive = link.hash === `#${entry.target.id}`;
+      link.classList.toggle('is-active', isActive);
+      if (isActive) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
+    });
   });
 }, { rootMargin: '-42% 0px -48% 0px', threshold: 0 });
 trackedSections.forEach((section) => dockObserver.observe(section));
