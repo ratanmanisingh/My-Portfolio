@@ -30,17 +30,21 @@ let ringX = 0;
 let ringY = 0;
 let targetRingX = 0;
 let targetRingY = 0;
+let shootingStars = [];
+let lastShootingStar = 0;
 function resizeCanvas() {
   canvas.width = window.innerWidth * devicePixelRatio;
   canvas.height = window.innerHeight * devicePixelRatio;
   context.setTransform(1, 0, 0, 1, 0, 0);
   context.scale(devicePixelRatio, devicePixelRatio);
-  stars = Array.from({ length: Math.min(170, Math.floor(window.innerWidth / 8)) }, () => ({ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight, radius: Math.random() * 1.2 + .2, alpha: Math.random() * .7 + .15, depth: Math.random() * .7 + .3, phase: Math.random() * Math.PI * 2 }));
+  stars = Array.from({ length: Math.min(220, Math.floor(window.innerWidth / 6)) }, () => ({ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight, radius: Math.random() * 1.35 + .2, alpha: Math.random() * .65 + .15, depth: Math.random() * .7 + .3, phase: Math.random() * Math.PI * 2, speed: Math.random() * .08 + .015 }));
 }
 function drawStars(time = 0) {
   const width = window.innerWidth; const height = window.innerHeight;
   context.clearRect(0, 0, width, height);
-  stars.forEach((star) => { const x = star.x + pointerX * star.depth * 10; const y = star.y + pointerY * star.depth * 10; const twinkle = star.alpha + Math.sin(time / 900 + star.phase) * .13; context.beginPath(); context.fillStyle = `rgba(207, 220, 255, ${twinkle})`; context.arc((x + width) % width, (y + height) % height, star.radius, 0, Math.PI * 2); context.fill(); });
+  stars.forEach((star) => { star.y -= star.speed * star.depth; if (star.y < -4) star.y = height + 4; const x = star.x + pointerX * star.depth * 10; const y = star.y + pointerY * star.depth * 10; const twinkle = Math.max(.08, star.alpha + Math.sin(time / 900 + star.phase) * .13); context.beginPath(); context.fillStyle = `rgba(207, 220, 255, ${twinkle})`; context.arc((x + width) % width, (y + height) % height, star.radius, 0, Math.PI * 2); context.fill(); });
+  if (time - lastShootingStar > 4200 && Math.random() > .985) { shootingStars.push({ x: Math.random() * width, y: Math.random() * height * .55, length: Math.random() * 70 + 45, life: 0 }); lastShootingStar = time; }
+  shootingStars = shootingStars.filter((star) => { star.x += 8; star.y += 5; star.life += 1; const gradient = context.createLinearGradient(star.x, star.y, star.x - star.length, star.y - star.length * .62); gradient.addColorStop(0, 'rgba(114,229,226,.8)'); gradient.addColorStop(1, 'rgba(114,229,226,0)'); context.strokeStyle = gradient; context.lineWidth = 1.5; context.beginPath(); context.moveTo(star.x, star.y); context.lineTo(star.x - star.length, star.y - star.length * .62); context.stroke(); return star.life < 34; });
   requestAnimationFrame(drawStars);
 }
 resizeCanvas(); drawStars();
