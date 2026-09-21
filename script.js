@@ -89,6 +89,9 @@ document.addEventListener('keydown', (event) => {
 const progressBar = document.querySelector('.scroll-progress span');
 const dockLinks = [...document.querySelectorAll('.dock-dot')];
 const trackedSections = [...document.querySelectorAll('main section[id]')];
+const heroSection = document.querySelector('.hero');
+const navigationLinks = [...document.querySelectorAll('.nav-links a')];
+const brandLink = document.querySelector('.brand');
 const rotatingCopy = document.querySelector('[data-rotating-copy]');
 const copyOptions = ['worth exploring.', 'feel alive.', 'solve real problems.'];
 let copyIndex = 0;
@@ -112,17 +115,31 @@ if (rotatingCopy && !window.matchMedia('(prefers-reduced-motion: reduce)').match
   }, 3200);
 }
 
+function setActiveSection(sectionId) {
+  const activeHash = `#${sectionId}`;
+  navigationLinks.forEach((link) => {
+    const isActive = link.hash === activeHash;
+    link.classList.toggle('is-active', isActive);
+    if (isActive) link.setAttribute('aria-current', 'location');
+    else link.removeAttribute('aria-current');
+  });
+  brandLink.classList.toggle('is-active', sectionId === 'top');
+}
+
 const dockObserver = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
     if (!entry.isIntersecting) return;
+    const sectionId = entry.target.id || 'top';
+    setActiveSection(sectionId);
     dockLinks.forEach((link) => {
-      const isActive = link.hash === `#${entry.target.id}`;
+      const isActive = link.hash === `#${sectionId}`;
       link.classList.toggle('is-active', isActive);
       if (isActive) link.setAttribute('aria-current', 'location');
       else link.removeAttribute('aria-current');
     });
   });
 }, { rootMargin: '-42% 0px -48% 0px', threshold: 0 });
-trackedSections.forEach((section) => dockObserver.observe(section));
+[heroSection, ...trackedSections].filter(Boolean).forEach((section) => dockObserver.observe(section));
+setActiveSection('top');
 
 document.querySelector('#contact-form').addEventListener('submit', (event) => { event.preventDefault(); const status = document.querySelector('.form-status'); status.textContent = 'Signal prepared. Opening your mail client...'; const formData = new FormData(event.currentTarget); const subject = encodeURIComponent(`Hello Ratanmani — ${formData.get('name')}`); const body = encodeURIComponent(`${formData.get('message')}\n\nReply to: ${formData.get('email')}`); window.location.href = `mailto:ratanmanisingh553@gmail.com?subject=${subject}&body=${body}`; });
