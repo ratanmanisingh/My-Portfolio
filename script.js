@@ -37,7 +37,7 @@ function resizeCanvas() {
   canvas.height = window.innerHeight * devicePixelRatio;
   context.setTransform(1, 0, 0, 1, 0, 0);
   context.scale(devicePixelRatio, devicePixelRatio);
-  stars = Array.from({ length: Math.min(220, Math.floor(window.innerWidth / 6)) }, () => ({ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight, radius: Math.random() * 1.35 + .2, alpha: Math.random() * .65 + .15, depth: Math.random() * .7 + .3, phase: Math.random() * Math.PI * 2, speed: Math.random() * .08 + .015 }));
+  stars = Array.from({ length: Math.min(520, Math.floor(window.innerWidth / 3)) }, () => ({ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight, radius: Math.random() * .7 + .12, alpha: Math.random() * .5 + .1, depth: Math.random() * .7 + .3, phase: Math.random() * Math.PI * 2, speed: Math.random() * .13 + .02 }));
 }
 function drawStars(time = 0) {
   const width = window.innerWidth; const height = window.innerHeight;
