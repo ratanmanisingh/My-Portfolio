@@ -23,6 +23,8 @@ document.querySelectorAll('.reveal').forEach((element) => observer.observe(eleme
 const canvas = document.querySelector('#starfield');
 const context = canvas.getContext('2d');
 const cursorRing = document.querySelector('.cursor-ring');
+const cursorGlow = document.querySelector('.cursor-glow');
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 let stars = [];
 let pointerX = 0;
 let pointerY = 0;
@@ -33,31 +35,37 @@ let targetRingY = 0;
 let shootingStars = [];
 let lastShootingStar = 0;
 function resizeCanvas() {
-  canvas.width = window.innerWidth * devicePixelRatio;
-  canvas.height = window.innerHeight * devicePixelRatio;
+  const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+  canvas.width = window.innerWidth * pixelRatio;
+  canvas.height = window.innerHeight * pixelRatio;
   context.setTransform(1, 0, 0, 1, 0, 0);
-  context.scale(devicePixelRatio, devicePixelRatio);
-  stars = Array.from({ length: Math.min(520, Math.floor(window.innerWidth / 3)) }, () => ({ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight, radius: Math.random() * .7 + .12, alpha: Math.random() * .5 + .1, depth: Math.random() * .7 + .3, phase: Math.random() * Math.PI * 2, speed: Math.random() * .13 + .02 }));
+  context.scale(pixelRatio, pixelRatio);
+  stars = Array.from({ length: Math.min(280, Math.floor(window.innerWidth / 5)) }, () => ({ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight, radius: Math.random() * .7 + .12, alpha: Math.random() * .5 + .1, depth: Math.random() * .7 + .3, phase: Math.random() * Math.PI * 2, speed: Math.random() * .13 + .02 }));
 }
 function drawStars(time = 0) {
   const width = window.innerWidth; const height = window.innerHeight;
   context.clearRect(0, 0, width, height);
-  stars.forEach((star) => { star.y -= star.speed * star.depth; if (star.y < -4) star.y = height + 4; const x = star.x + pointerX * star.depth * 10; const y = star.y + pointerY * star.depth * 10; const twinkle = Math.max(.08, star.alpha + Math.sin(time / 900 + star.phase) * .13); context.beginPath(); context.fillStyle = `rgba(207, 220, 255, ${twinkle})`; context.arc((x + width) % width, (y + height) % height, star.radius, 0, Math.PI * 2); context.fill(); });
+  stars.forEach((star) => { star.y -= star.speed * star.depth; if (star.y < -4) star.y = height + 4; const x = star.x + pointerX * star.depth * 10; const y = star.y + pointerY * star.depth * 10; const twinkle = Math.max(.08, star.alpha + Math.sin(time / 900 + star.phase) * .13); context.fillStyle = `rgba(207, 220, 255, ${twinkle})`; context.fillRect((x + width) % width, (y + height) % height, star.radius * 2, star.radius * 2); });
   if (time - lastShootingStar > 4200 && Math.random() > .985) { shootingStars.push({ x: Math.random() * width, y: Math.random() * height * .55, length: Math.random() * 70 + 45, life: 0 }); lastShootingStar = time; }
   shootingStars = shootingStars.filter((star) => { star.x += 8; star.y += 5; star.life += 1; const gradient = context.createLinearGradient(star.x, star.y, star.x - star.length, star.y - star.length * .62); gradient.addColorStop(0, 'rgba(114,229,226,.8)'); gradient.addColorStop(1, 'rgba(114,229,226,0)'); context.strokeStyle = gradient; context.lineWidth = 1.5; context.beginPath(); context.moveTo(star.x, star.y); context.lineTo(star.x - star.length, star.y - star.length * .62); context.stroke(); return star.life < 34; });
-  requestAnimationFrame(drawStars);
+  if (!document.hidden) requestAnimationFrame(drawStars);
 }
 resizeCanvas(); drawStars();
 window.addEventListener('resize', resizeCanvas);
-window.addEventListener('pointermove', (event) => { pointerX = event.clientX / window.innerWidth - .5; pointerY = event.clientY / window.innerHeight - .5; targetRingX = event.clientX; targetRingY = event.clientY; document.querySelector('.cursor-glow').style.left = `${event.clientX}px`; document.querySelector('.cursor-glow').style.top = `${event.clientY}px`; });
+window.addEventListener('visibilitychange', () => {
+  if (document.hidden) return;
+  requestAnimationFrame(drawStars);
+  if (!reducedMotion.matches) requestAnimationFrame(animateCursor);
+});
+window.addEventListener('pointermove', (event) => { pointerX = event.clientX / window.innerWidth - .5; pointerY = event.clientY / window.innerHeight - .5; targetRingX = event.clientX; targetRingY = event.clientY; if (cursorGlow) cursorGlow.style.transform = `translate3d(${event.clientX}px, ${event.clientY}px, 0) translate(-50%, -50%)`; }, { passive: true });
 
 function animateCursor() {
   ringX += (targetRingX - ringX) * .16;
   ringY += (targetRingY - ringY) * .16;
   if (cursorRing) cursorRing.style.transform = `translate3d(${ringX}px, ${ringY}px, 0)`;
-  requestAnimationFrame(animateCursor);
+  if (!document.hidden && !reducedMotion.matches) requestAnimationFrame(animateCursor);
 }
-animateCursor();
+if (!reducedMotion.matches) animateCursor();
 
 document.querySelectorAll('.project-card, .codolio-panel, .signal-card').forEach((card) => {
   card.addEventListener('pointermove', (event) => {
