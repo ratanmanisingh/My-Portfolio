@@ -15,17 +15,22 @@
 @media(prefers-reduced-motion:reduce){.hero-orbit,.orbit-one,.orbit-two,.planet,.status-dot{animation:none}[data-rotating-copy]{transition:none}.project-card:after,.signal-card:after{display:none}}
 
 /* Dark moving space atmosphere behind the portfolio content. */
-body{background:#02030a;color:var(--ink)}
-.ambient-space{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:-3;background:radial-gradient(ellipse at center,rgba(8,12,30,.25),rgba(2,3,10,.92) 76%)}
-.ambient-space:before{content:"";position:absolute;inset:-30%;background:conic-gradient(from 180deg at 50% 50%,transparent,rgba(24,38,92,.18),transparent 28%,rgba(4,87,112,.1),transparent 54%,rgba(39,18,92,.16),transparent);filter:blur(42px);animation:space-rotation 34s linear infinite}
+body{background:#010208;color:var(--ink)}
+.ambient-space{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:-3;background:radial-gradient(ellipse at 50% 36%,rgba(12,18,48,.3),rgba(1,2,8,.96) 78%)}
+.ambient-space:before{content:"";position:absolute;inset:-30%;background:conic-gradient(from 180deg at 50% 50%,transparent,rgba(24,38,92,.25),transparent 28%,rgba(4,87,112,.16),transparent 54%,rgba(39,18,92,.2),transparent);filter:blur(42px);animation:space-rotation 30s linear infinite}
+.ambient-space:after{content:"";position:absolute;inset:-15%;background:linear-gradient(rgba(114,229,226,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(159,140,255,.045) 1px,transparent 1px);background-size:72px 72px;mask-image:linear-gradient(to bottom,transparent 8%,black 42%,transparent 100%);transform:perspective(500px) rotateX(58deg) translateY(13%);transform-origin:center bottom;opacity:.52;animation:grid-drift 18s linear infinite}
+.ambient-space{isolation:isolate}
+.ambient-space:before,.ambient-space:after{will-change:transform}
 .nebula{position:absolute;display:block;border-radius:50%;filter:blur(55px);mix-blend-mode:screen;opacity:.22;animation:nebula-drift 18s ease-in-out infinite alternate}
 .nebula-one{width:48vw;height:30vw;left:-15vw;top:12vh;background:rgba(25,55,150,.55);transform:rotate(-18deg)}
 .nebula-two{width:42vw;height:24vw;right:-14vw;top:38vh;background:rgba(9,102,128,.42);animation-delay:-6s}
 .nebula-three{width:34vw;height:20vw;left:32vw;bottom:-12vh;background:rgba(76,33,140,.35);animation-delay:-11s}
 #starfield{z-index:-2;opacity:.92}
 @keyframes space-rotation{to{transform:rotate(360deg)}}
-@keyframes nebula-drift{0%{translate:-2% -3%;scale:.94;opacity:.14}50%{opacity:.25}100%{translate:5% 4%;scale:1.08;opacity:.2}}
-@media(prefers-reduced-motion:reduce){.ambient-space:before,.nebula{animation:none}}
+@keyframes grid-drift{0%{background-position:0 0,0 0;transform:perspective(500px) rotateX(58deg) translateY(13%)}100%{background-position:0 72px,72px 0;transform:perspective(500px) rotateX(58deg) translateY(19%)}}
+@keyframes nebula-drift{0%{translate:-4% -3%;scale:.9;opacity:.16}50%{opacity:.3}100%{translate:7% 5%;scale:1.12;opacity:.24}}
+@media(max-width:800px){.ambient-space:after{background-size:48px 48px;opacity:.38}}
+@media(prefers-reduced-motion:reduce){.ambient-space:before,.ambient-space:after,.nebula{animation:none}}
 
 body .site-header{position:fixed;top:18px;left:50%;width:min(1180px,calc(100% - 36px));height:70px;padding:0 22px;transform:translateX(-50%);display:flex;align-items:center;gap:24px;background:rgba(8,11,29,.82);border:1px solid rgba(114,229,226,.24);border-radius:18px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 14px 45px rgba(0,0,0,.28);z-index:10}
 main{padding-top:106px}
